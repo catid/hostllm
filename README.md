@@ -6,6 +6,8 @@ Reproducible local-hosted LLM scripts organized by model profile.
 
 - `models/<model-id>/setup_env.sh`
 - `models/<model-id>/run_*.sh`
+- `models/<model-id>/benchmark_*.sh`
+- `models/<model-id>/test_model.sh`
 - `models/<model-id>/requirements.lock.txt`
 
 Each model directory is self-contained so you can add more models without touching existing ones.
@@ -29,5 +31,9 @@ Each model directory is self-contained so you can add more models without touchi
 cd models/minimaxm25
 ./setup_env.sh
 ./run_bf16.sh
-./run_fp8.sh
+# In another shell:
+./test_model.sh
+# Optional benchmark scripts:
+./benchmark_bf16.sh
+./benchmark_fp8.sh
 ```

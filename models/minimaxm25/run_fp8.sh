@@ -16,30 +16,22 @@ fi
 
 . .venv/bin/activate
 
-mkdir -p logs results
-RESULT_FILE="results/bench_fp8.jsonl"
-SERVER_LOG="logs/server_fp8.log"
-rm -f "$RESULT_FILE"
-
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export HF_HUB_ENABLE_HF_TRANSFER=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-SERVER_PID=""
-cleanup() {
-  if [[ -n "$SERVER_PID" ]] && kill -0 "$SERVER_PID" 2>/dev/null; then
-    kill "$SERVER_PID" || true
-    wait "$SERVER_PID" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
+HOST="${SGLANG_HOST:-0.0.0.0}"
+PORT="${SGLANG_PORT:-8000}"
 
-if ss -ltn | awk '$4 ~ /:8000$/ {found=1} END {exit !found}'; then
-  echo "Port 8000 is already in use. Stop the existing service and retry."
+if ss -ltn | awk -v p="$PORT" '$4 ~ (":" p "$") {found=1} END {exit !found}'; then
+  echo "Port $PORT is already in use. Stop the existing service and retry."
   exit 1
 fi
 
-python -m sglang.launch_server \
+echo "Starting FP8 server on ${HOST}:${PORT} ..."
+echo "Use Ctrl+C to stop."
+
+exec python -m sglang.launch_server \
   --model-path MiniMaxAI/MiniMax-M2.5 \
   --tp-size 4 \
   --quantization fp8 \
@@ -50,39 +42,5 @@ python -m sglang.launch_server \
   --fp8-gemm-backend cutlass \
   --cuda-graph-bs 1 2 4 8 16 32 64 128 \
   --cuda-graph-max-bs 128 \
-  --host 127.0.0.1 \
-  --port 8000 \
-  >"$SERVER_LOG" 2>&1 &
-SERVER_PID=$!
-
-ready=0
-for _ in {1..180}; do
-  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
-    echo "Server failed to start. See $SERVER_LOG"
-    tail -n 120 "$SERVER_LOG"
-    exit 1
-  fi
-  if curl -fsS http://127.0.0.1:8000/v1/models >/dev/null 2>&1; then
-    ready=1
-    break
-  fi
-  sleep 2
-done
-
-if [[ "$ready" -ne 1 ]]; then
-  echo "Timed out waiting for server readiness. See $SERVER_LOG"
-  exit 1
-fi
-
-python -m sglang.bench_one_batch_server \
-  --model-path MiniMaxAI/MiniMax-M2.5 \
-  --trust-remote-code \
-  --base-url http://127.0.0.1:8000 \
-  --batch-size 1 2 4 8 16 32 64 128 \
-  --input-len 1000 \
-  --output-len 1000 \
-  --dataset-name random \
-  --skip-warmup \
-  --result-filename "$RESULT_FILE"
-
-echo "Saved $RESULT_FILE"
+  --host "$HOST" \
+  --port "$PORT"
