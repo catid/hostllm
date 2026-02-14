@@ -13,6 +13,7 @@ Each model directory is self-contained so you can add more models without touchi
 ## Current model profiles
 
 - `models/minimaxm25`
+- `models/TEMPLATE.md` (starter checklist for new profiles)
 
 ## Add a new model
 
