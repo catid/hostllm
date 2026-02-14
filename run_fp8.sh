@@ -34,6 +34,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+if ss -ltn | awk '$4 ~ /:8000$/ {found=1} END {exit !found}'; then
+  echo "Port 8000 is already in use. Stop the existing service and retry."
+  exit 1
+fi
+
 python -m sglang.launch_server \
   --model-path MiniMaxAI/MiniMax-M2.5 \
   --tp-size 4 \
@@ -52,14 +57,14 @@ SERVER_PID=$!
 
 ready=0
 for _ in {1..180}; do
-  if curl -fsS http://127.0.0.1:8000/v1/models >/dev/null 2>&1; then
-    ready=1
-    break
-  fi
   if ! kill -0 "$SERVER_PID" 2>/dev/null; then
     echo "Server failed to start. See $SERVER_LOG"
     tail -n 120 "$SERVER_LOG"
     exit 1
+  fi
+  if curl -fsS http://127.0.0.1:8000/v1/models >/dev/null 2>&1; then
+    ready=1
+    break
   fi
   sleep 2
 done
