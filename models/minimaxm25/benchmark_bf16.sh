@@ -25,6 +25,8 @@ rm -f "$RESULT_FILE"
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export HF_HUB_ENABLE_HF_TRANSFER=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# Keep FlashInfer JIT cache local to this model profile to avoid stale global cache paths.
+export FLASHINFER_WORKSPACE_BASE="${FLASHINFER_WORKSPACE_BASE:-$ROOT_DIR}"
 
 if ss -ltn | awk -v p="$PORT" '$4 ~ (":" p "$") {found=1} END {exit !found}'; then
   echo "Port $PORT is already in use. Stop the existing service and retry."

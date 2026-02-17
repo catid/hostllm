@@ -7,7 +7,7 @@ if [[ $# -ne 0 ]]; then
 fi
 
 BASE_URL="${SGLANG_BASE_URL:-http://127.0.0.1:8000}"
-MODEL_ID="${SGLANG_MODEL_ID:-MiniMaxAI/MiniMax-M2.5}"
+MODEL_ID="${SGLANG_MODEL_ID:-catid/MiniMax-M2.5-catid}"
 
 echo "Checking model listing at ${BASE_URL}/v1/models ..."
 curl -fsS "${BASE_URL}/v1/models" > /dev/null

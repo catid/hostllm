@@ -3,3 +3,4 @@ logs/
 results/
 *.log
 bench_*.jsonl
+models/*/.cache/

@@ -32,7 +32,7 @@ echo "Starting FP8 server on ${HOST}:${PORT} ..."
 echo "Use Ctrl+C to stop."
 
 exec python -m sglang.launch_server \
-  --model-path MiniMaxAI/MiniMax-M2.5 \
+  --model-path catid/MiniMax-M2.5-catid \
   --tp-size 4 \
   --quantization fp8 \
   --tool-call-parser minimax-m2 \

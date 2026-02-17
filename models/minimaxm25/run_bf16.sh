@@ -19,6 +19,8 @@ fi
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 export HF_HUB_ENABLE_HF_TRANSFER=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+# Keep FlashInfer JIT cache local to this model profile to avoid stale global cache paths.
+export FLASHINFER_WORKSPACE_BASE="${FLASHINFER_WORKSPACE_BASE:-$ROOT_DIR}"
 
 HOST="${SGLANG_HOST:-0.0.0.0}"
 PORT="${SGLANG_PORT:-8000}"

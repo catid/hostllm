@@ -41,7 +41,7 @@ cleanup() {
 trap cleanup EXIT
 
 python -m sglang.launch_server \
-  --model-path MiniMaxAI/MiniMax-M2.5 \
+  --model-path catid/MiniMax-M2.5-catid \
   --tp-size 4 \
   --quantization fp8 \
   --tool-call-parser minimax-m2 \
@@ -76,7 +76,7 @@ if [[ "$ready" -ne 1 ]]; then
 fi
 
 python -m sglang.bench_one_batch_server \
-  --model-path MiniMaxAI/MiniMax-M2.5 \
+  --model-path catid/MiniMax-M2.5-catid \
   --trust-remote-code \
   --base-url "http://127.0.0.1:${PORT}" \
   --batch-size 1 2 4 8 16 32 64 128 \
